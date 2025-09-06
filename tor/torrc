@@ -1,0 +1,9 @@
+RunAsDaemon 0
+User debian-tor
+DataDirectory /var/lib/tor
+Log notice stdout
+
+# Hidden service forwards onion:80 to web:8080 inside the compose network
+HiddenServiceDir /var/lib/tor/hidden_service
+HiddenServiceVersion 3
+HiddenServicePort 80 web:8080

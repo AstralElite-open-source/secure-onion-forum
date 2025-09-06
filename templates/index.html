@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<nav class="categories">
+  <strong>Categories:</strong>
+  <a href="{{ url_for('index') }}" class="chip {% if not cat %}active{% endif %}">All</a>
+  {% for c in categories %}
+    <a href="{{ url_for('index', cat=c['slug']) }}" class="chip {% if cat and cat['id']==c['id'] %}active{% endif %}">{{ c['name'] }}</a>
+  {% endfor %}
+</nav>
+
+<section class="recent">
+  <h2>Recent posts</h2>
+  <ul class="recent-list">
+    {% for r in recent_posts %}
+      <li>
+        <a href="{{ url_for('thread_view', thread_id=r['thread_id']) }}#p{{ r['post_id'] }}">{{ r['thread_title'] }}</a>
+        <span class="meta">in {{ r['category_name'] or 'Uncategorized' }} • {{ r['created_at'] | int | datetimeformat }}</span>
+      </li>
+    {% else %}
+      <li>No recent activity.</li>
+    {% endfor %}
+  </ul>
+</section>
+
+<section class="new-thread">
+  <h2>Start a new thread</h2>
+  <form method="post" action="{{ url_for('create_thread') }}" class="card">
+    <input type="hidden" name="csrf_token" value="{{ session['csrf_token'] }}" />
+    <label>Title
+      <input name="title" maxlength="140" required />
+    </label>
+    <label>Category
+      <select name="category_id">
+        {% for c in categories %}
+          <option value="{{ c['id'] }}" {% if cat and cat['id'] == c['id'] %}selected{% endif %}>{{ c['name'] }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Name (optional)
+      <input name="author" maxlength="32" placeholder="anon" />
+    </label>
+    <label>Content
+      <textarea name="content" rows="5" maxlength="5000" required></textarea>
+      <small>Supports Markdown (paragraphs, lists, links). Newlines become line breaks.</small>
+    </label>
+    <button type="submit" class="btn-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" class="icon" aria-hidden="true"><path fill="currentColor" d="M3 12h18v2H3v-2Zm0-5h18v2H3V7Zm0 10h18v2H3v-2Z"/></svg>
+      Post
+    </button>
+  </form>
+  <hr />
+</section>
+
+<section class="threads">
+  <h2>{% if cat %}{{ cat['name'] }}{% else %}All{% endif %} threads</h2>
+  <ul class="thread-list">
+    {% for t in threads %}
+      <li class="thread">
+        <a href="{{ url_for('thread_view', thread_id=t['id']) }}" class="title">{{ t['title'] }}</a>
+        <span class="meta">{{ t['posts_count'] }} posts • updated {{ t['last_activity_at'] | int | datetimeformat }} • {{ t['category_name'] or 'Uncategorized' }}</span>
+      </li>
+    {% else %}
+      <li>No threads yet. Be the first!</li>
+    {% endfor %}
+  </ul>
+
+  {% if total_pages > 1 %}
+    <nav class="pagination">
+      {% if page > 1 %}
+        <a href="?page={{ page - 1 }}">« Prev</a>
+      {% endif %}
+      <span>Page {{ page }} / {{ total_pages }}</span>
+      {% if page < total_pages %}
+        <a href="?page={{ page + 1 }}">Next »</a>
+      {% endif %}
+    </nav>
+  {% endif %}
+</section>
+
+{% endblock %}

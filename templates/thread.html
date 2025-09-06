@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block content %}
+<article class="thread-view">
+  <header>
+    <div class="breadcrumb">
+      <a href="{{ url_for('index') }}">All</a>
+      {% if thread['category_slug'] %}
+        › <a href="{{ url_for('index', cat=thread['category_slug']) }}">{{ thread['category_name'] }}</a>
+      {% endif %}
+    </div>
+    <h2>{{ thread['title'] }}</h2>
+    <p class="meta">{{ thread['posts_count'] }} posts • started {{ thread['created_at'] | int | datetimeformat }}</p>
+  </header>
+
+  <ol class="posts">
+    {% for p in posts %}
+      <li id="p{{ p['id'] }}" class="post">
+        <div class="post-head">
+          <strong class="author">{{ p['author'] or 'anon' }}</strong>
+          <span class="time">{{ p['created_at'] | int | datetimeformat }}</span>
+        </div>
+  <div class="content">{{ p['content'] | markdown }}</div>
+
+        {# Comments #}
+        {% set cmts = comments_map.get(p['id'], []) %}
+        <details class="comments" {% if cmts %}open{% endif %}>
+          <summary>
+            <svg width="16" height="16" viewBox="0 0 24 24" class="icon" aria-hidden="true"><path fill="currentColor" d="M4 4h16v12H7l-3 3V4Zm2 4v2h12V8H6Zm0 4v2h8v-2H6Z"/></svg>
+            {{ cmts|length }} {{ 'comment' if cmts|length == 1 else 'comments' }}
+          </summary>
+          <ol class="comment-list">
+            {% for c in cmts %}
+              <li class="comment">
+                <div class="comment-head">
+                  <strong>{{ c['author'] or 'anon' }}</strong>
+                  <span class="time">{{ c['created_at'] | int | datetimeformat }}</span>
+                </div>
+                <div class="content">{{ c['content'] | markdown }}</div>
+              </li>
+            {% endfor %}
+          </ol>
+          <form method="post" action="{{ url_for('comment', post_id=p['id']) }}" class="comment-form">
+            <input type="hidden" name="csrf_token" value="{{ session['csrf_token'] }}" />
+            <label>Name (optional)
+              <input name="author" maxlength="32" placeholder="anon" />
+            </label>
+            <label>Comment
+              <textarea name="content" rows="3" maxlength="2000" required></textarea>
+            </label>
+            <button type="submit" class="btn-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" class="icon" aria-hidden="true"><path fill="currentColor" d="M2 21l21-9L2 3v7l15 2l-15 2v7Z"/></svg>
+              Comment
+            </button>
+          </form>
+        </details>
+      </li>
+    {% else %}
+      <li>No posts yet.</li>
+    {% endfor %}
+  </ol>
+
+  {% if total_pages > 1 %}
+    <nav class="pagination">
+      {% if page > 1 %}
+        <a href="?page={{ page - 1 }}">« Prev</a>
+      {% endif %}
+      <span>Page {{ page }} / {{ total_pages }}</span>
+      {% if page < total_pages %}
+        <a href="?page={{ page + 1 }}">Next »</a>
+      {% endif %}
+    </nav>
+  {% endif %}
+
+  <section class="reply">
+    <h3>Reply</h3>
+    <form method="post" action="{{ url_for('reply', thread_id=thread['id']) }}" class="card">
+      <input type="hidden" name="csrf_token" value="{{ session['csrf_token'] }}" />
+      <label>Name (optional)
+        <input name="author" maxlength="32" placeholder="anon" />
+      </label>
+      <label>Message
+  <textarea name="content" rows="5" maxlength="5000" required></textarea>
+  <small>Supports Markdown. Newlines become line breaks.</small>
+      </label>
+  <button type="submit">Create post</button>
+    </form>
+  </section>
+</article>
+{% endblock %}

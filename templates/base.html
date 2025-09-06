@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ title or 'Onion Forum' }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="container compact">
+        <a class="brand" href="{{ url_for('index') }}">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" class="icon"><path fill="currentColor" d="M12 2C9.2 2 7 4.2 7 7v2H6a4 4 0 0 0-4 4v5a2 2 0 0 0 2 2h6v-6H7v-3c0-2.8 2.2-5 5-5s5 2.2 5 5v3h-3v6h6a2 2 0 0 0 2-2v-5a4 4 0 0 0-4-4h-1V7c0-2.8-2.2-5-5-5Z"/></svg>
+          Onion Forum
+        </a>
+        <div style="float:right; font-size: 12px; display:flex; gap:8px; align-items:center;">
+          {% if session.get('is_admin') %}
+            <a href="{{ url_for('admin_users') }}">Admin</a>
+          {% endif %}
+          {% if session.get('user_id') %}
+            <span>Signed in as {{ session.get('username') }}</span>
+            <a href="{{ url_for('logout') }}">Logout</a>
+          {% elif config.get('REQUIRE_LOGIN') %}
+            <a href="{{ url_for('login') }}">Login</a>
+          {% endif %}
+        </div>
+      </div>
+    </header>
+    <main class="container">
+      {% block content %}{% endblock %}
+    </main>
+    <footer class="footer">
+      <div class="container compact">
+        <small>Lightweight forum • No tracking • Works well over Tor</small>
+      </div>
+    </footer>
+  </body>
+  </html>
