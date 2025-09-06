@@ -2,6 +2,8 @@
 
 Lightweight, login-protected forum for Tor. Fast to deploy, minimal dependencies, and ready as a v3 onion service.
 
+## full encryption - First login will become admin then you are able to add user and admin.
+### upcoming feature - delete user and edit username and password
 ## Features
 
 - Zero JavaScript by default, server‑rendered UI
